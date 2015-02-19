@@ -1,0 +1,22 @@
+{
+    "name": "tripda/ringCaptcha",
+    "description": "RingCaptcha basic SDK created by Tripda IT Team",
+    "authors": [
+        {
+            "name": "Tripda IT Team"
+        }],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=5.4",
+        "guzzlehttp/guzzle-services": "0.5.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "RingCaptcha\\": "src/RingCaptcha",
+            "Test\\": "tests/"
+        }
+    }
+}
