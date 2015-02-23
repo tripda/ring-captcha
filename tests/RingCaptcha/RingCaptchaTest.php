@@ -16,7 +16,7 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $apiKey = null;
-        $appKey =  null;
+        $appKey = null;
         $this->ringCaptcha = new RingCaptcha($apiKey, $appKey);
     }
 

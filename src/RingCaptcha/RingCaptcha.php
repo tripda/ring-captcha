@@ -4,10 +4,13 @@ namespace RingCaptcha;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Message\ResponseInterface;
+use RingCaptcha\Constants\ErrorResponse;
+use RingCaptcha\Constants\MessageResponse;
 
 Class RingCaptcha
 {
     const BASE_URL = 'https://api.ringcaptcha.com/%s/%s';
+
     protected $apiKey;
     protected $appKey;
     protected $http;
@@ -20,9 +23,10 @@ Class RingCaptcha
 
     public function __construct($apiKey, $appKey)
     {
-        if (!$apiKey || !$appKey)
-        {
-            throw new \InvalidArgumentException('Api key or appkey is not defined');
+        if (!isset($apiKey) || !isset($appKey)) {
+            throw new \InvalidArgumentException(
+                ErrorResponse::getErrorMessage(ErrorResponse::KEYS_NOT_DEFINED)
+            );
         }
 
         $this->apiKey = $apiKey;
@@ -41,29 +45,45 @@ Class RingCaptcha
         return $params;
     }
 
-    protected function prepareResponse(ResponseInterface $data)
+    protected function validateResponse(array $response)
     {
-        if ($data->getStatusCode()!=200)
-        {
-            return [];
+        if (isset($response['status']) && $response['status']==='ERROR') {
+            throw new \InvalidArgumentException(
+                MessageResponse::getMessageResponse($response['message'])
+            );
         }
 
-        return json_decode($data->getBody(), true);
+        return true;
+    }
+
+    protected function prepareResponse(ResponseInterface $data)
+    {
+        if ($data->getStatusCode()!=200) {
+            throw new \InvalidArgumentException(
+                $data->getReasonPhrase()
+            );
+        }
+
+        $response = json_decode($data->getBody(), true);
+        $this->validateResponse($response);
+
+        return $response;
     }
 
     protected function executeQuery(array $params, $service)
     {
         $formattedUrl = sprintf(self::BASE_URL,$this->appKey,self::$services[$service]);
-        $response = $this->http->post($formattedUrl,$params);
-        
-        return $this->prepareResponse($response);
+        $data = $this->http->post($formattedUrl,$params);
+
+        return $this->prepareResponse($data);
     }
 
     public function sendVerificationPinCode($phoneNumber)
     {
-        if (!$phoneNumber)
-        {
-            throw new \InvalidArgumentException('Phone number is empty');
+        if (!isset($phoneNumber)) {
+            throw new \InvalidArgumentException(
+                ErrorResponse::getErrorMessage(ErrorResponse::PHONE_NUMBER_NOT_DEFINED)
+            );
         }
 
         $params = $this->getDefaultParams();
@@ -74,9 +94,10 @@ Class RingCaptcha
 
     public function verifyPinCode($phoneNumber, $pinCode)
     {
-        if (!$phoneNumber || !$pinCode)
-        {
-            throw new \InvalidArgumentException('Phone number or pin code is empty');
+        if (!isset($phoneNumber) || !isset($pinCode)) {
+            throw new \InvalidArgumentException(
+                ErrorResponse::getErrorMessage(ErrorResponse::PHONE_OR_PIN_NOT_DEFINED)
+            );
         }
 
         $params = $this->getDefaultParams();
@@ -88,9 +109,10 @@ Class RingCaptcha
 
     public function sendSMS($phoneNumber, $message)
     {
-        if (!$phoneNumber || !$message)
-        {
-            throw new \InvalidArgumentException('Phone number or message is empty');
+        if (!isset($phoneNumber) || !isset($message)) {
+            throw new \InvalidArgumentException(
+                ErrorResponse::getErrorMessage(ErrorResponse::PHONE_OR_MESSAGE_NOT_DEFINED)
+            );
         }
 
         $params = $this->getDefaultParams();
