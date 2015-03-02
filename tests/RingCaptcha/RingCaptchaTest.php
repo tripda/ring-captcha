@@ -2,9 +2,14 @@
 /**
  * This file is just help to development
  */
-namespace Tests\RingCaptcha;
+namespace Test\RingCaptcha;
 
 use RingCaptcha\RingCaptcha;
+use RingCaptcha\ConfigurationFactory as RingCaptchaConfigurationFactory;
+use Guzzle\Http\Client as GuzzleClient;
+use Guzzle\Plugin\Mock\MockPlugin;
+use Guzzle\Http\Message\Response;
+
 
 class SendVerificationTest extends \PHPUnit_Framework_TestCase
 {
@@ -17,7 +22,13 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     {
         $apiKey = null;
         $appKey = null;
-        $this->ringCaptcha = new RingCaptcha($apiKey, $appKey);
+        $plugin = new MockPlugin();
+        $plugin->addResponse(new Response(200, null, '{"test" : 233432, "status": "SUCCESS"}'));
+        $client = new GuzzleClient();
+        $client->addSubscriber($plugin);
+        $configuration = (new RingCaptchaConfigurationFactory)->createRingCaptchaConfiguration($apiKey, $appKey, $client);
+
+        $this->ringCaptcha = new RingCaptcha($configuration);
     }
 
     public function testSendVerificationPinCode()
@@ -32,7 +43,7 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     public function testVerifyPinCode()
     {
         $phoneNumber = null;
-        $code = null;
+        $code = 'code';
 
         $response = $this->ringCaptcha->verifyPinCode($phoneNumber, $code);
 
@@ -42,7 +53,7 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     public function testSendSMS()
     {
         $phoneNumber = null;
-        $message = null;
+        $message = 'Test message';
 
         $response = $this->ringCaptcha->sendSMS($phoneNumber, $message);
 
