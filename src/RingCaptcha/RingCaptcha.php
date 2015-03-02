@@ -2,39 +2,47 @@
 
 namespace RingCaptcha;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Message\ResponseInterface;
+use Guzzle\Http\Message\Response;
 use RingCaptcha\Constants\ErrorResponse;
 use RingCaptcha\Constants\MessageResponse;
+use RingCaptcha\Model\ConfigurationModel;
 
 Class RingCaptcha
 {
     const BASE_URL = 'https://api.ringcaptcha.com/%s/%s';
 
-    protected $apiKey;
-    protected $appKey;
-    protected $http;
+    private $apiKey;
+    private $appKey;
+    private $http;
 
-    protected static $services = [
-        0 => 'code/sms',
-        1 => 'verify',
-        2 => 'sms'
-    ];
-
-    public function __construct($apiKey, $appKey)
+    public function __construct(ConfigurationModel $configuration)
     {
-        if (!isset($apiKey) || !isset($appKey)) {
-            throw new \InvalidArgumentException(
-                ErrorResponse::getErrorMessage(ErrorResponse::KEYS_NOT_DEFINED)
-            );
-        }
-
-        $this->apiKey = $apiKey;
-        $this->appKey = $appKey;
-        $this->http = new Client();
+        $this->apiKey = $configuration->getApiKey();
+        $this->appKey = $configuration->getAppKey();
+        $this->http = $configuration->getHttpClient();
     }
 
-    protected function getDefaultParams()
+    private function prepareUrl($route)
+    {
+       return sprintf(self::BASE_URL,$this->appKey,$route);
+    }
+
+    private function prepareUrlSendCode()
+    {
+        return $this->prepareUrl('code/sms');
+    }
+
+    private function prepareUrlVerifyCode()
+    {
+        return $this->prepareUrl('verify');
+    }
+
+    private function prepareUrlSendSMS()
+    {
+        return $this->prepareUrl('sms');
+    }
+
+    private function getDefaultParams()
     {
         $params = [
             'body' => [
@@ -56,7 +64,7 @@ Class RingCaptcha
         return true;
     }
 
-    protected function prepareResponse(ResponseInterface $data)
+    protected function prepareResponse(Response $data)
     {
         if ($data->getStatusCode()!=200) {
             throw new \InvalidArgumentException(
@@ -70,10 +78,9 @@ Class RingCaptcha
         return $response;
     }
 
-    protected function executeQuery(array $params, $service)
+    protected function executeQuery(array $params, $url)
     {
-        $formattedUrl = sprintf(self::BASE_URL,$this->appKey,self::$services[$service]);
-        $data = $this->http->post($formattedUrl,$params);
+        $data = $this->http->post($url,$params)->send();
 
         return $this->prepareResponse($data);
     }
@@ -89,7 +96,9 @@ Class RingCaptcha
         $params = $this->getDefaultParams();
         $params['body']['phone'] = $phoneNumber;
 
-        return $this->executeQuery($params, 0);
+        $url = $this->prepareUrlSendCode();
+
+        return $this->executeQuery($params, $url);
     }
 
     public function verifyPinCode($phoneNumber, $pinCode)
@@ -104,7 +113,9 @@ Class RingCaptcha
         $params['body']['phone'] = $phoneNumber;
         $params['body']['code'] = $pinCode;
 
-        return $this->executeQuery($params, 1);
+        $url = $this->prepareUrlVerifyCode();
+
+        return $this->executeQuery($params, $url);
     }
 
     public function sendSMS($phoneNumber, $message)
@@ -119,6 +130,8 @@ Class RingCaptcha
         $params['body']['phone'] = $phoneNumber;
         $params['body']['message'] = $message;
 
-        return $this->executeQuery($params, 2);
+        $url = $this->prepareUrlSendSMS();
+
+        return $this->executeQuery($params, $url);
     }
 }
