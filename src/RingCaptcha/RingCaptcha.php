@@ -3,6 +3,7 @@
 namespace RingCaptcha;
 
 use Guzzle\Http\Message\Response;
+use RingCaptcha\PhoneNumberFactory;
 use RingCaptcha\Constants\ErrorResponse;
 use RingCaptcha\Constants\MessageResponse;
 use RingCaptcha\Model\ConfigurationModel;
@@ -85,32 +86,36 @@ Class RingCaptcha
         return $this->prepareResponse($data);
     }
 
-    public function sendVerificationPinCode($phoneNumber)
+    public function sendVerificationPinCode($countryCode, $phoneNumber)
     {
-        if (!isset($phoneNumber)) {
+        $internationalNumber = (new PhoneNumberFactory($countryCode, $phoneNumber))->getInternationalNumber();
+
+        if (!isset($internationalNumber)) {
             throw new \InvalidArgumentException(
                 ErrorResponse::getErrorMessage(ErrorResponse::PHONE_NUMBER_NOT_DEFINED)
             );
         }
 
         $params = $this->getDefaultParams();
-        $params['body']['phone'] = $phoneNumber;
+        $params['body']['phone'] = $internationalNumber;
 
         $url = $this->prepareUrlSendCode();
 
         return $this->executeQuery($params, $url);
     }
 
-    public function verifyPinCode($phoneNumber, $pinCode)
+    public function verifyPinCode($countryCode, $phoneNumber, $pinCode)
     {
-        if (!isset($phoneNumber) || !isset($pinCode)) {
+        $internationalNumber = (new PhoneNumberFactory($countryCode, $phoneNumber))->getInternationalNumber();
+
+        if (!isset($internationalNumber) || !isset($pinCode)) {
             throw new \InvalidArgumentException(
                 ErrorResponse::getErrorMessage(ErrorResponse::PHONE_OR_PIN_NOT_DEFINED)
             );
         }
 
         $params = $this->getDefaultParams();
-        $params['body']['phone'] = $phoneNumber;
+        $params['body']['phone'] = $internationalNumber;
         $params['body']['code'] = $pinCode;
 
         $url = $this->prepareUrlVerifyCode();
@@ -118,16 +123,18 @@ Class RingCaptcha
         return $this->executeQuery($params, $url);
     }
 
-    public function sendSMS($phoneNumber, $message)
+    public function sendSMS($countryCode, $phoneNumber, $message)
     {
-        if (!isset($phoneNumber) || !isset($message)) {
+        $internationalNumber = (new PhoneNumberFactory($countryCode, $phoneNumber))->getInternationalNumber();
+
+        if (!isset($internationalNumber) || !isset($message)) {
             throw new \InvalidArgumentException(
                 ErrorResponse::getErrorMessage(ErrorResponse::PHONE_OR_MESSAGE_NOT_DEFINED)
             );
         }
 
         $params = $this->getDefaultParams();
-        $params['body']['phone'] = $phoneNumber;
+        $params['body']['phone'] = $internationalNumber;
         $params['body']['message'] = $message;
 
         $url = $this->prepareUrlSendSMS();

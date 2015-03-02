@@ -1,7 +1,5 @@
 <?php
-/**
- * This file is just help to development
- */
+
 namespace Test\RingCaptcha;
 
 use RingCaptcha\RingCaptcha;
@@ -59,9 +57,10 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     public function testEmptyPhoneNumber()
     {
         $this->setSuccessfulRequest();
+        $countryCode = null;
         $phoneNumber = null;
 
-        $this->ringCaptcha->sendVerificationPinCode($phoneNumber);
+        $this->ringCaptcha->sendVerificationPinCode($countryCode, $phoneNumber);
     }
 
     /**
@@ -70,10 +69,11 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     public function testEmptyPinCode()
     {
         $this->setSuccessfulRequest();
-        $phoneNumber = '+55999999999';
+        $countryCode = '55';
+        $phoneNumber = '999999999';
         $code = null;
 
-        $this->ringCaptcha->verifyPinCode($phoneNumber, $code);
+        $this->ringCaptcha->verifyPinCode($countryCode, $phoneNumber, $code);
     }
 
     /**
@@ -82,18 +82,20 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     public function testEmptyMessage()
     {
         $this->setSuccessfulRequest();
-        $phoneNumber = '+55999999999';
+        $countryCode = '55';
+        $phoneNumber = '999999999';
         $message = null;
 
-        $this->ringCaptcha->sendSMS($phoneNumber, $message);
+        $this->ringCaptcha->sendSMS($countryCode, $phoneNumber, $message);
     }
 
     public function testSendVerificationPinCodeSuccessful()
     {
         $this->setSuccessfulRequest();
-        $phoneNumber = '+55999999999';
+        $countryCode = '55';
+        $phoneNumber = '999999999';
 
-        $response = $this->ringCaptcha->sendVerificationPinCode($phoneNumber);
+        $response = $this->ringCaptcha->sendVerificationPinCode($countryCode, $phoneNumber);
 
         $this->assertArrayHasKey('status', $response);
     }
@@ -104,18 +106,20 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     public function testSendVerificationPinCodeError()
     {
         $this->setErrorRequest();
-        $phoneNumber = '+55999999999';
+        $countryCode = '55';
+        $phoneNumber = '999999999';
 
-        $this->ringCaptcha->sendVerificationPinCode($phoneNumber);
+        $this->ringCaptcha->sendVerificationPinCode($countryCode, $phoneNumber);
     }
 
     public function testVerifyPinCodeSuccessful()
     {
         $this->setSuccessfulRequest();
-        $phoneNumber = '+55999999999';
+        $countryCode = '55';
+        $phoneNumber = '999999999';
         $code = 'code';
 
-        $response = $this->ringCaptcha->verifyPinCode($phoneNumber, $code);
+        $response = $this->ringCaptcha->verifyPinCode($countryCode, $phoneNumber, $code);
 
         $this->assertArrayHasKey('status', $response);
     }
@@ -126,19 +130,21 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     public function testVerifyPinCodeError()
     {
         $this->setErrorRequest();
-        $phoneNumber = '+55999999999';
+        $countryCode = '55';
+        $phoneNumber = '999999999';
         $code = 'code';
 
-        $this->ringCaptcha->verifyPinCode($phoneNumber, $code);
+        $this->ringCaptcha->verifyPinCode($countryCode, $phoneNumber, $code);
     }
 
     public function testSendSMSSuccessful()
     {
         $this->setSuccessfulRequest();
-        $phoneNumber = '+55999999999';
+        $countryCode = '55';
+        $phoneNumber = '999999999';
         $message = 'Test message';
 
-        $response = $this->ringCaptcha->sendSMS($phoneNumber, $message);
+        $response = $this->ringCaptcha->sendSMS($countryCode, $phoneNumber, $message);
 
         $this->assertArrayHasKey('status', $response);
     }
@@ -149,9 +155,10 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     public function testSendSMSError()
     {
         $this->setErrorRequest();
-        $phoneNumber = '+55999999999';
+        $countryCode = '55';
+        $phoneNumber = '999999999';
         $message = 'Test message';
 
-        $this->ringCaptcha->sendSMS($phoneNumber, $message);
+        $this->ringCaptcha->sendSMS($countryCode, $phoneNumber, $message);
     }
 }
