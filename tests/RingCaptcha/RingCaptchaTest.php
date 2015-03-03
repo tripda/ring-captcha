@@ -11,6 +11,11 @@ use Guzzle\Http\Message\Response;
 
 class SendVerificationTest extends \PHPUnit_Framework_TestCase
 {
+    const COUNTRY_CODE = '55';
+    const PHONE_NUMBER = '999999999';
+    const ERROR_RESPONSE = '{"test" : 233432, "status": "ERROR", "message": "ERROR_DIRECT_API_ACCESS_NOT_AVAILABLE"}';
+    const SUCCESSFUL_RESPONSE = '{"test" : 233432, "status": "SUCCESS"}';
+
     /**
      * @var RingCaptcha
      */
@@ -25,24 +30,10 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
         $this->appKey = 'test app key';
     }
 
-    private function setSuccessfulRequest()
+    private function createConfiguration($response)
     {
         $plugin = new MockPlugin();
-        $plugin->addResponse(new Response(200, null, '{"test" : 233432, "status": "SUCCESS"}'));
-        $client = new GuzzleClient();
-        $client->addSubscriber($plugin);
-        $configuration = (new RingCaptchaConfigurationFactory)->createRingCaptchaConfiguration(
-            $this->apiKey, $this->appKey, $client);
-
-        $this->ringCaptcha = new RingCaptcha($configuration);
-    }
-
-    private function setErrorRequest()
-    {
-        $plugin = new MockPlugin();
-        $plugin->addResponse(new Response(200, null,
-            '{"test" : 233432, "status": "ERROR", "message": "ERROR_DIRECT_API_ACCESS_NOT_AVAILABLE"}'));
-
+        $plugin->addResponse(new Response(200, null, $response));
         $client = new GuzzleClient();
         $client->addSubscriber($plugin);
         $configuration = (new RingCaptchaConfigurationFactory)->createRingCaptchaConfiguration(
@@ -56,7 +47,7 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
      */
     public function testEmptyPhoneNumber()
     {
-        $this->setSuccessfulRequest();
+        $this->createConfiguration(self::SUCCESSFUL_RESPONSE);
         $countryCode = null;
         $phoneNumber = null;
 
@@ -68,12 +59,9 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
      */
     public function testEmptyPinCode()
     {
-        $this->setSuccessfulRequest();
-        $countryCode = '55';
-        $phoneNumber = '999999999';
-        $code = null;
+        $this->createConfiguration(self::SUCCESSFUL_RESPONSE);
 
-        $this->ringCaptcha->verifyPinCode($countryCode, $phoneNumber, $code);
+        $this->ringCaptcha->verifyPinCode(self::COUNTRY_CODE, self::PHONE_NUMBER, null);
     }
 
     /**
@@ -81,21 +69,16 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
      */
     public function testEmptyMessage()
     {
-        $this->setSuccessfulRequest();
-        $countryCode = '55';
-        $phoneNumber = '999999999';
-        $message = null;
+        $this->createConfiguration(self::SUCCESSFUL_RESPONSE);
 
-        $this->ringCaptcha->sendSMS($countryCode, $phoneNumber, $message);
+        $this->ringCaptcha->sendSMS(self::COUNTRY_CODE, self::PHONE_NUMBER, null);
     }
 
     public function testSendVerificationPinCodeSuccessful()
     {
-        $this->setSuccessfulRequest();
-        $countryCode = '55';
-        $phoneNumber = '999999999';
+        $this->createConfiguration(self::SUCCESSFUL_RESPONSE);
 
-        $response = $this->ringCaptcha->sendVerificationPinCode($countryCode, $phoneNumber);
+        $response = $this->ringCaptcha->sendVerificationPinCode(self::COUNTRY_CODE, self::PHONE_NUMBER);
 
         $this->assertArrayHasKey('status', $response);
     }
@@ -105,21 +88,16 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
      */
     public function testSendVerificationPinCodeError()
     {
-        $this->setErrorRequest();
-        $countryCode = '55';
-        $phoneNumber = '999999999';
+        $this->createConfiguration(self::ERROR_RESPONSE);
 
-        $this->ringCaptcha->sendVerificationPinCode($countryCode, $phoneNumber);
+        $this->ringCaptcha->sendVerificationPinCode(self::COUNTRY_CODE, self::PHONE_NUMBER);
     }
 
     public function testVerifyPinCodeSuccessful()
     {
-        $this->setSuccessfulRequest();
-        $countryCode = '55';
-        $phoneNumber = '999999999';
-        $code = 'code';
+        $this->createConfiguration(self::SUCCESSFUL_RESPONSE);
 
-        $response = $this->ringCaptcha->verifyPinCode($countryCode, $phoneNumber, $code);
+        $response = $this->ringCaptcha->verifyPinCode(self::COUNTRY_CODE, self::PHONE_NUMBER, 'code');
 
         $this->assertArrayHasKey('status', $response);
     }
@@ -129,22 +107,16 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
      */
     public function testVerifyPinCodeError()
     {
-        $this->setErrorRequest();
-        $countryCode = '55';
-        $phoneNumber = '999999999';
-        $code = 'code';
+        $this->createConfiguration(self::ERROR_RESPONSE);
 
-        $this->ringCaptcha->verifyPinCode($countryCode, $phoneNumber, $code);
+        $this->ringCaptcha->verifyPinCode(self::COUNTRY_CODE, self::PHONE_NUMBER, 'code');
     }
 
     public function testSendSMSSuccessful()
     {
-        $this->setSuccessfulRequest();
-        $countryCode = '55';
-        $phoneNumber = '999999999';
-        $message = 'Test message';
+        $this->createConfiguration(self::SUCCESSFUL_RESPONSE);
 
-        $response = $this->ringCaptcha->sendSMS($countryCode, $phoneNumber, $message);
+        $response = $this->ringCaptcha->sendSMS(self::COUNTRY_CODE, self::PHONE_NUMBER, 'Test message');
 
         $this->assertArrayHasKey('status', $response);
     }
@@ -154,11 +126,8 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
      */
     public function testSendSMSError()
     {
-        $this->setErrorRequest();
-        $countryCode = '55';
-        $phoneNumber = '999999999';
-        $message = 'Test message';
+        $this->createConfiguration(self::ERROR_RESPONSE);
 
-        $this->ringCaptcha->sendSMS($countryCode, $phoneNumber, $message);
+        $this->ringCaptcha->sendSMS(self::COUNTRY_CODE, self::PHONE_NUMBER, 'Test message');
     }
 }
