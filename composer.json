@@ -1,6 +1,6 @@
 {
-    "name": "tripda/ringCaptcha",
-    "description": "RingCaptcha basic SDK created by Tripda IT Team",
+    "name": "tripda/ring-captcha",
+    "description": "RingCaptcha SDK created by Tripda IT Team",
     "authors": [
         {
             "name": "Tripda IT Team"
