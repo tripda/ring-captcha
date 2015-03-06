@@ -3,7 +3,6 @@
 namespace Test\RingCaptcha;
 
 use RingCaptcha\RingCaptcha;
-use RingCaptcha\ConfigurationFactory as RingCaptchaConfigurationFactory;
 use Guzzle\Http\Client as GuzzleClient;
 use Guzzle\Plugin\Mock\MockPlugin;
 use Guzzle\Http\Message\Response;
@@ -36,10 +35,8 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
         $plugin->addResponse(new Response(200, null, $response));
         $client = new GuzzleClient();
         $client->addSubscriber($plugin);
-        $configuration = (new RingCaptchaConfigurationFactory)->createRingCaptchaConfiguration(
-            $this->apiKey, $this->appKey, $client);
 
-        $this->ringCaptcha = new RingCaptcha($configuration);
+        $this->ringCaptcha = new RingCaptcha($this->apiKey, $this->appKey, $client);
     }
 
     /**

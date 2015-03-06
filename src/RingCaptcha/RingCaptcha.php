@@ -2,11 +2,10 @@
 
 namespace RingCaptcha;
 
+use Guzzle\Http\Client as GuzzleClient;
 use Guzzle\Http\Message\Response;
-use RingCaptcha\PhoneNumberFactory;
 use RingCaptcha\Constants\ErrorResponse;
 use RingCaptcha\Constants\MessageResponse;
-use RingCaptcha\Model\ConfigurationModel;
 
 Class RingCaptcha
 {
@@ -16,11 +15,11 @@ Class RingCaptcha
     private $appKey;
     private $http;
 
-    public function __construct(ConfigurationModel $configuration)
+    public function __construct($apiKey, $appKey, $client = null)
     {
-        $this->apiKey = $configuration->getApiKey();
-        $this->appKey = $configuration->getAppKey();
-        $this->http = $configuration->getHttpClient();
+        $this->apiKey = $apiKey;
+        $this->appKey = $appKey;
+        $this->http = $this->configureHttpClient($client);
     }
 
     private function prepareUrl($route)
@@ -140,5 +139,14 @@ Class RingCaptcha
         $url = $this->prepareUrlSendSMS();
 
         return $this->executeQuery($params, $url);
+    }
+
+    private static function configureHttpClient($client)
+    {
+        if ($client == null) {
+            return new GuzzleClient();
+        }
+
+        return $client;
     }
 }
