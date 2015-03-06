@@ -85,10 +85,8 @@ Class RingCaptcha
         return $this->prepareResponse($data);
     }
 
-    public function sendVerificationPinCode($countryCode, $phoneNumber)
+    public function sendVerificationPinCode($internationalNumber)
     {
-        $internationalNumber = (new PhoneNumberFactory($countryCode, $phoneNumber))->getInternationalNumber();
-
         if (!isset($internationalNumber)) {
             throw new \InvalidArgumentException(
                 ErrorResponse::getErrorMessage(ErrorResponse::PHONE_NUMBER_NOT_DEFINED)
@@ -103,10 +101,8 @@ Class RingCaptcha
         return $this->executeQuery($params, $url);
     }
 
-    public function verifyPinCode($countryCode, $phoneNumber, $pinCode)
+    public function verifyPinCode($internationalNumber, $pinCode)
     {
-        $internationalNumber = (new PhoneNumberFactory($countryCode, $phoneNumber))->getInternationalNumber();
-
         if (!isset($internationalNumber) || !isset($pinCode)) {
             throw new \InvalidArgumentException(
                 ErrorResponse::getErrorMessage(ErrorResponse::PHONE_OR_PIN_NOT_DEFINED)
@@ -122,10 +118,8 @@ Class RingCaptcha
         return $this->executeQuery($params, $url);
     }
 
-    public function sendSMS($countryCode, $phoneNumber, $message)
+    public function sendSMS($internationalNumber, $message)
     {
-        $internationalNumber = (new PhoneNumberFactory($countryCode, $phoneNumber))->getInternationalNumber();
-
         if (!isset($internationalNumber) || !isset($message)) {
             throw new \InvalidArgumentException(
                 ErrorResponse::getErrorMessage(ErrorResponse::PHONE_OR_MESSAGE_NOT_DEFINED)
