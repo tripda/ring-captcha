@@ -45,9 +45,7 @@ Class RingCaptcha
     private function getDefaultParams()
     {
         $params = [
-            'body' => [
                 'api_key' => $this->apiKey,
-            ]
         ];
 
         return $params;
@@ -80,7 +78,8 @@ Class RingCaptcha
 
     protected function executeQuery(array $params, $url)
     {
-        $data = $this->http->post($url,$params)->send();
+        $data = $this->http->post(
+            $url, array('Content-Type' => 'application/x-www-url-encoded; charset=utf-8'), $params)->send();
 
         return $this->prepareResponse($data);
     }
@@ -94,7 +93,7 @@ Class RingCaptcha
         }
 
         $params = $this->getDefaultParams();
-        $params['body']['phone'] = $internationalNumber;
+        $params['phone'] = $internationalNumber;
 
         $url = $this->prepareUrlSendCode();
 
@@ -110,8 +109,8 @@ Class RingCaptcha
         }
 
         $params = $this->getDefaultParams();
-        $params['body']['phone'] = $internationalNumber;
-        $params['body']['code'] = $pinCode;
+        $params['phone'] = $internationalNumber;
+        $params['code'] = $pinCode;
 
         $url = $this->prepareUrlVerifyCode();
 
@@ -127,8 +126,8 @@ Class RingCaptcha
         }
 
         $params = $this->getDefaultParams();
-        $params['body']['phone'] = $internationalNumber;
-        $params['body']['message'] = $message;
+        $params['phone'] = $internationalNumber;
+        $params['message'] = $message;
 
         $url = $this->prepareUrlSendSMS();
 
