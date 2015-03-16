@@ -36,7 +36,8 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
         $client = new GuzzleClient();
         $client->addSubscriber($plugin);
 
-        $this->ringCaptcha = new RingCaptcha($this->apiKey, $this->appKey, $client);
+        $this->ringCaptcha = new RingCaptcha($this->apiKey, $this->appKey);
+        $this->ringCaptcha->setClient($client);
     }
 
     /**
@@ -79,7 +80,7 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException RuntimeException
      */
     public function testSendVerificationPinCodeError()
     {
@@ -98,7 +99,7 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException RuntimeException
      */
     public function testVerifyPinCodeError()
     {
@@ -117,7 +118,7 @@ class SendVerificationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException RuntimeException
      */
     public function testSendSMSError()
     {

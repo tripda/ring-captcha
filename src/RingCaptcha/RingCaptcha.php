@@ -14,12 +14,17 @@ Class RingCaptcha
     private $apiKey;
     private $appKey;
     private $http;
+    private $client;
 
-    public function __construct($apiKey, $appKey, $client = null)
+    public function __construct($apiKey, $appKey)
     {
         $this->apiKey = $apiKey;
         $this->appKey = $appKey;
-        $this->http = $this->configureHttpClient($client);
+    }
+
+    public function setClient(GuzzleClient $client)
+    {
+        $this->client = $client;
     }
 
     private function prepareUrl($route)
@@ -54,7 +59,7 @@ Class RingCaptcha
     protected function validateResponse(array $response)
     {
         if (isset($response['status']) && $response['status']==='ERROR') {
-            throw new \InvalidArgumentException(
+            throw new \RuntimeException(
                 MessageResponse::getMessageResponse($response['message'])
             );
         }
@@ -78,6 +83,8 @@ Class RingCaptcha
 
     protected function executeQuery(array $params, $url)
     {
+        $this->http = $this->configureHttpClient($this->client);
+
         $data = $this->http->post(
             $url, array('Content-Type' => 'application/x-www-url-encoded; charset=utf-8'), $params)->send();
 
