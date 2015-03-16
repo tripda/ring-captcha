@@ -40,20 +40,7 @@ class MessageResponse
             'PIN code is incorrect',
     ];
 
-    /**
-     * @param string $messageCode
-     * @return string
-     */
     public static function getMessageResponse($messageCode)
-    {
-        return self::$messageCodes[$messageCode];
-    }
-
-    /**
-     * @param string $messageCode
-     * @return boolean
-     */
-    public static function hasCode($messageCode)
     {
         return self::$messageCodes[$messageCode];
     }
