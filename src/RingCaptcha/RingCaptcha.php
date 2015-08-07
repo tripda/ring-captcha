@@ -4,8 +4,11 @@ namespace RingCaptcha;
 
 use Guzzle\Http\Client as GuzzleClient;
 use Guzzle\Http\Message\Response;
-use RingCaptcha\Constants\ErrorResponse;
-use RingCaptcha\Constants\MessageResponse;
+use RingCaptcha\Constant\MessageResponse;
+use RingCaptcha\Exception\MessageNotDefined;
+use RingCaptcha\Exception\PhoneNumberNotDefined;
+use RingCaptcha\Exception\PinCodeNotDefined;
+use RingCaptcha\Exception\RequestException;
 
 Class RingCaptcha
 {
@@ -59,8 +62,9 @@ Class RingCaptcha
     protected function validateResponse(array $response)
     {
         if (isset($response['status']) && $response['status']==='ERROR') {
-            throw new \RuntimeException(
-                MessageResponse::getMessageResponse($response['message'])
+            throw new RequestException(
+                MessageResponse::getMessageResponse($response['message']),
+                json_encode($response)
             );
         }
 
@@ -94,9 +98,7 @@ Class RingCaptcha
     public function sendVerificationPinCode($internationalNumber)
     {
         if (!isset($internationalNumber)) {
-            throw new \InvalidArgumentException(
-                ErrorResponse::getErrorMessage(ErrorResponse::PHONE_NUMBER_NOT_DEFINED)
-            );
+            throw new PhoneNumberNotDefined();
         }
 
         $params = $this->getDefaultParams();
@@ -109,10 +111,12 @@ Class RingCaptcha
 
     public function verifyPinCode($internationalNumber, $pinCode)
     {
-        if (!isset($internationalNumber) || !isset($pinCode)) {
-            throw new \InvalidArgumentException(
-                ErrorResponse::getErrorMessage(ErrorResponse::PHONE_OR_PIN_NOT_DEFINED)
-            );
+        if (!isset($internationalNumber)) {
+            throw new PhoneNumberNotDefined();
+        }
+
+        if (!isset($pinCode)) {
+            throw new PinCodeNotDefined();
         }
 
         $params = $this->getDefaultParams();
@@ -126,10 +130,12 @@ Class RingCaptcha
 
     public function sendSMS($internationalNumber, $message)
     {
-        if (!isset($internationalNumber) || !isset($message)) {
-            throw new \InvalidArgumentException(
-                ErrorResponse::getErrorMessage(ErrorResponse::PHONE_OR_MESSAGE_NOT_DEFINED)
-            );
+        if (!isset($internationalNumber)) {
+            throw new PhoneNumberNotDefined();
+        }
+
+        if (!isset($message)) {
+            throw new MessageNotDefined();
         }
 
         $params = $this->getDefaultParams();

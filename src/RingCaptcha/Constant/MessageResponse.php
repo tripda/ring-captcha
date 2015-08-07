@@ -1,6 +1,6 @@
 <?php
 
-namespace RingCaptcha\Constants;
+namespace RingCaptcha\Constant;
 
 class MessageResponse
 {
@@ -38,6 +38,10 @@ class MessageResponse
             'Token is incorrect or has already expired/been verified',
         'ERROR_INVALID_PIN_CODE' =>
             'PIN code is incorrect',
+        'ERROR_OUT_OF_CREDITS' =>
+            'Out off credit',
+        'UNKNOWN_ERROR' =>
+            'Unknown error',
     ];
 
     public static function getMessageResponse($messageCode)
